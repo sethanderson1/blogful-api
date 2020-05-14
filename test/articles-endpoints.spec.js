@@ -20,7 +20,7 @@ describe('Articles Endpoints', function () {
     afterEach('cleanup', () => db('blogful_articles').truncate())
 
     describe(`GET /api/articles`, () => {
-        context(`Given no articles`, () => {
+                context(`Given no articles`, () => {
             it(`responds with 200 and an empty list`, () => {
                 return supertest(app)
                     .get('/api/articles')
@@ -114,7 +114,7 @@ describe('Articles Endpoints', function () {
         })
     })
 
-    describe.only(`POST /api/articles`, () => {
+    describe(`POST /api/articles`, () => {
         it(`creates an article, responding with 201 and the new article`, function () {
             this.retries(3)
             const newArticle = {
@@ -211,46 +211,5 @@ describe('Articles Endpoints', function () {
         })
 
     })
-
-    describe(`PATCH /api/articles/:article_id`, () => {
-        context(`Given no articles`, () => {
-            it(`responds with 404`, () => {
-                const articleId = 123456
-                return supertest(app)
-                    .patch(`/api/articles/${articleId}`)
-                    .expect(404, { error: { message: `Article doesn't exist` } })
-            })
-        })
-        context('Given there are articles in the database', () => {
-            const testArticles = makeArticlesArray()
-
-            beforeEach('insert articles', () => {
-                return db
-                    .into('blogful_articles')
-                    .insert(testArticles)
-            })
-
-            it('responds with 204 and updates the article', () => {
-                const idToUpdate = 2
-                const updateArticle = {
-                    title: 'updated article title',
-                    style: 'Interview',
-                    content: 'updated article content',
-                }
-                const expectedArticle = {
-                    ...testArticles[idToUpdate - 1],
-                    ...updateArticle
-                }
-                return supertest(app)
-                    .patch(`/api/articles/${idToUpdate}`)
-                    .send(updateArticle)
-                    .expect(204)
-                    .then(res =>
-                        supertest(app)
-                            .get(`/api/articles/${idToUpdate}`)
-                            .expect(expectedArticle)
-                    )
-            })
-        })
-    })
+    
 })

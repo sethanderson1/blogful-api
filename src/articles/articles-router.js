@@ -41,7 +41,7 @@ articlesRouter
             .then(article => {
                 res
                     .status(201)
-                    .location(req.originalUrl`/${article.id}`).json(serializeArticle(article))
+                    .location(req.originalUrl + `/${article.id}`)                    .json(serializeArticle(article))
             })
             .catch(next)
     })
@@ -83,17 +83,6 @@ articlesRouter
             })
             .catch(next)
     })
-    // .patch(jsonParser, (req, res, next) => {
-    //     const { title, content, style } = req.body
-    //     const articleToUpdate = { title, content, style }
-    //     ArticlesService.updateArticle(
-    //         req.app.get('db'),
-    //         req.params.article_id,
-    //         articleToUpdate
-    //     )
-    //         .then(numRowsAffected => {
-    //             res.status(204).end()
-    //         })
-    //         .catch(next)
-    // })
+    
+
 module.exports = articlesRouter
