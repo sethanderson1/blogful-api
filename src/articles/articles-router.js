@@ -41,7 +41,8 @@ articlesRouter
             .then(article => {
                 res
                     .status(201)
-                    .location(req.originalUrl + `/${article.id}`)                    .json(serializeArticle(article))
+                    .location(path.posix.join(req.originalUrl, `/${article.id}`))
+                    .json(serializeArticle(article))
             })
             .catch(next)
     })
@@ -59,30 +60,45 @@ articlesRouter
                         error: { message: `Article doesn't exist` }
                     })
                 }
-                res.article = article // save the article for the next middleware
-                next() // don't forget to call next so the next middleware happens!
+                res.article = article
+                next()
             })
             .catch(next)
     })
     .get((req, res, next) => {
-        res.json({
-            id: res.article.id,
-            style: res.article.style,
-            title: xss(res.article.title), // sanitize title
-            content: xss(res.article.content), // sanitize content
-            date_published: res.article.date_published,
-        })
+        res.json(serializeArticle(res.article))
     })
     .delete((req, res, next) => {
         ArticlesService.deleteArticle(
             req.app.get('db'),
             req.params.article_id
         )
-            .then(() => {
+            .then(numRowsAffected => {
                 res.status(204).end()
             })
             .catch(next)
     })
-    
+    .patch(jsonParser, (req, res, next) => {
+        const { title, content, style } = req.body
+        const articleToUpdate = { title, content, style }
+
+        const numberOfValues = Object.values(articleToUpdate).filter(Boolean).length
+        if (numberOfValues === 0)
+            return res.status(400).json({
+                error: {
+                    message: `Request body must content either 'title', 'style' or 'content'`
+                }
+            })
+
+        ArticlesService.updateArticle(
+            req.app.get('db'),
+            req.params.article_id,
+            articleToUpdate
+        )
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
 
 module.exports = articlesRouter
